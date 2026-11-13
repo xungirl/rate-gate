@@ -27,6 +27,86 @@ commands and caveats in [BENCHMARK.md](BENCHMARK.md)):
   118,978 req/s.
 - One in-memory decision takes ~40-150 ns with 0 allocations (`go test -bench`).
 
+## Project Journey
+
+How the project was built, in commit order, including what broke. All of it
+happened on 2026-11-12. Numbers come from [BENCHMARK.md](BENCHMARK.md) and
+`results/`; they are **localhost numbers on one laptop**, and a repeat run
+showed **±20% run-to-run variance** in throughput, so read single values loosely.
+
+1. **Testable time, four algorithms, sharded store** (`260405f`, `5f29e14`).
+   A `Clock` interface with a `Fake` clock lets algorithm tests advance time
+   instead of sleeping. Token bucket, fixed window, sliding log and sliding
+   counter share a 64-shard map (a mutex per shard instead of one global lock).
+   Measured later: 38.90–43.01 ns/op with 10k keys in parallel vs.
+   132.5–148.3 ns/op on one hot key (~3-4x), so sharding helps only when keys differ.
+2. **Redis backend as atomic Lua scripts** (`0382774`). Rejected GET-then-SET
+   (two gateways can both read "99 of 100" and both allow) and gateway-side
+   time (clock skew between hosts); scripts call Redis `TIME` instead. A Lua 5.1
+   pitfall surfaced here: large numbers can be formatted with `%.14g`, losing
+   digits of a 16-digit microsecond timestamp, so scripts write it with
+   `string.format('%d', ts)` (checked with `HGETALL` on real Redis; see INTERVIEW.md).
+3. **Failure handling + limiter tests** (`d642aac`, `c25906f`). Circuit breaker
+   (5 errors → open 2 s → half-open probe) with explicit `fail_open`,
+   `fail_closed` and `local_fallback` policies. Tests prove the boundary flaw
+   rather than claim it: 10 + 10 requests around a window edge at 10/s, fixed
+   window allows 20, sliding log/counter 10, token bucket 11; 100 goroutines × 20
+   requests against limit 100 allow exactly 100. Re-run: `go test -race ./internal/limiter/`.
+4. **Config, metrics, proxy, hot reload** (`5ce477a`, `79a13ce`, `fa1f282`,
+   `ba1e067`). `TestMultiInstanceSharedRedis`: 3 gateway instances, 300
+   concurrent requests, exactly 50 allowed for limit 50; the in-memory contrast
+   allows 150. Hot reload swaps an immutable route table via `atomic.Pointer`.
+   The transport keeps 1024 idle conns per upstream host instead of Go's default 2.
+5. **BufferPool optimization** (`8e7bb8e`). `ReverseProxy` allocated a 32 KiB
+   copy buffer per request; a `sync.Pool`-backed `BufferPool` raised proxy-only
+   throughput from 30,647 to 52,969 req/s (29,568 → 49,717 with the limiter) at
+   64 connections. Caveat: **single quick 3 s runs, raw output not saved**, so
+   the size of the gain is loose given the ±20% variance. Details:
+   [BENCHMARK.md §4](BENCHMARK.md#4-experiments).
+6. **Own load generator + bench scripts** (`f7aaa23`, `f290459`). Closed loop
+   for overhead (direct vs. proxy-only vs. +memory vs. +Redis), open loop for
+   accuracy (offer 6x the limit). Re-run everything: `scripts/bench.sh`.
+7. **Flaky tests under `-race -count=10`** (`2a2cccd`). Three fixes, all in
+   tests: (a) `http.DefaultClient` keeps only 2 idle conns per host, so
+   concurrent tests opened a new TCP connection per request and exhausted
+   ephemeral ports over 10 runs (`can't assign requested address`); tests now
+   share a client with 100 idle conns per host. (b) Redis test calls got an
+   explicit 1 s timeout (production default is 50 ms). (c) The sliding counter's
+   `Retry-After` may legitimately reach 2 windows while the previous window
+   decays, so the assertion was widened. After the fix
+   `RATEGATE_REDIS_ADDR=127.0.0.1:6390 go test -race -count=10 ./...` passed
+   (BENCHMARK.md §5; the test log was not saved).
+8. **Measurement + variance check** (`16aa2e7`). Accuracy: 3 instances on one
+   Redis allowed **exactly 10,000 of 10,000** expected requests (token bucket,
+   fixed window, sliding log; 9,990 for the sliding counter) while 59,994 were
+   offered; the in-memory backend allowed ~3x. Overhead at c=64: memory limiter
+   within noise of proxy-only (42,939 vs. 43,366 req/s), Redis 24,396 req/s.
+   Surprise: `scripts/repeat.sh` re-ran c=64 three times and the gateway cells
+   came out ~15-26% faster with the same binary, hence the ±20% caveat; the
+   *ordering* held in every run.
+
+### Key metrics
+
+| metric | value | how measured | source file |
+|---|---|---|---|
+| Shared-limit accuracy, 3 instances + Redis | 10,000 allowed of 10,000 expected (token bucket, fixed window, sliding log); 9,990 sliding counter | open loop, 6000 req/s offered vs. 1000/s limit, 10 s | `results/accuracy-redis-*.json` |
+| In-memory contrast (no sharing) | 2,983–3,000 allowed/s (~3x limit) | same run, memory backend | `results/accuracy-memory-*.json` |
+| Throughput at c=64: direct / proxy / +memory / +Redis | 118,978 / 43,366 / 42,939 / 24,396 req/s (±20%) | closed loop, 10 s, 1000 keys, localhost | `results/throughput-*-c64.json` |
+| Added p50 latency at c=64, memory vs. Redis limiter | +0.622 ms / +2.003 ms vs. direct | derived from the row above | BENCHMARK.md §1 |
+| In-memory decision cost | 38.90–148.3 ns/op, 0 allocs | `go test -bench`, 2 s | `results/microbench.txt` |
+| Redis decision cost | 15,091–17,783 ns/op (128 callers) | `go test -bench`, real Redis | `results/microbench.txt` |
+| BufferPool change, proxy-only | 30,647 → 52,969 req/s | single 3 s runs, output not saved | BENCHMARK.md §4 |
+| Run-to-run variance | gateway cells 15-26% faster on re-run | `scripts/repeat.sh`, 3 runs | `results/repeat-*.json` |
+
+### Next steps
+
+- Benchmark on separate machines (loadgen, gateway, Redis) and re-measure the
+  BufferPool change with repeated, saved runs.
+- Test on Redis Cluster (scripts are single-key and hash-tagged but untested there).
+- Hot-key mitigation: local pre-aggregation of tokens or splitting a limit across sub-keys.
+- Profile why parallel in-memory throughput doesn't scale linearly with cores.
+- Configurable trusted-hop count for `X-Forwarded-For`; TLS and auth.
+
 ## Architecture
 
 ```
