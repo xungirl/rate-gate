@@ -23,9 +23,9 @@ import (
 type State int
 
 const (
-	Closed State = iota // normal: calls go through
-	Open                // failing: calls are skipped
-	HalfOpen            // probing: one call is allowed to test recovery
+	Closed   State = iota // normal: calls go through
+	Open                  // failing: calls are skipped
+	HalfOpen              // probing: one call is allowed to test recovery
 )
 
 func (s State) String() string {
