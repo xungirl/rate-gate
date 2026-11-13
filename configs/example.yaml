@@ -1,0 +1,50 @@
+# Example rate-gate config. Durations use Go syntax: 500ms, 1s, 1m, 1h.
+listen: ":8080"
+shutdown_timeout: 10s
+trust_forwarded_for: false   # only true behind a load balancer you control
+
+log:
+  level: info      # debug logs every 429
+  access: false    # one JSON line per request
+
+backend:
+  type: memory     # memory | redis
+  cleanup_interval: 1m
+  redis:
+    addr: "127.0.0.1:6390"
+    pool_size: 256
+    timeout: 50ms  # per limiter call; on timeout the failure_mode applies
+  failure_mode: local_fallback   # fail_open | fail_closed | local_fallback
+  breaker:
+    failure_threshold: 5   # consecutive Redis errors before opening
+    open_timeout: 2s       # how long to skip Redis before probing again
+
+routes:
+  # Longest path_prefix wins.
+  - name: api
+    path_prefix: /api/
+    upstream: http://127.0.0.1:9001
+    rate_limit:
+      algorithm: token_bucket   # token_bucket | fixed_window | sliding_window_log | sliding_window_counter
+      key_by: api_key           # ip | api_key | user_id | header:<Name>
+      limit: 10                 # 10 requests per window ...
+      window: 1s
+      burst: 20                 # ... with bursts up to 20 (token bucket only)
+      overrides:
+        - key: premium-key-123  # this API key gets 10x
+          limit: 100
+          burst: 200
+
+  - name: login
+    path_prefix: /login
+    upstream: http://127.0.0.1:9001
+    rate_limit:
+      algorithm: sliding_window_log   # exact, good for small strict limits
+      key_by: ip
+      limit: 5
+      window: 1m
+
+  - name: public
+    path_prefix: /
+    upstream: http://127.0.0.1:9001
+    # no rate_limit: forwarded unmetered
