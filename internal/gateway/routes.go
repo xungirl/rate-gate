@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -165,6 +166,18 @@ func newLimiter(cfg *config.Config, deps Deps, alg limiter.Algorithm, rule limit
 	})
 }
 
+// bufferPool reuses the 32 KiB buffers ReverseProxy copies response bodies
+// through. Without it, every proxied request allocates a fresh buffer.
+var bufferPool = &syncBufferPool{pool: sync.Pool{New: func() any {
+	b := make([]byte, 32*1024)
+	return &b
+}}}
+
+type syncBufferPool struct{ pool sync.Pool }
+
+func (p *syncBufferPool) Get() []byte  { return *p.pool.Get().(*[]byte) }
+func (p *syncBufferPool) Put(b []byte) { p.pool.Put(&b) }
+
 // newProxy builds the reverse proxy for one route.
 func newProxy(rc config.Route, target *url.URL, transport http.RoundTripper, m *metrics.Metrics) *httputil.ReverseProxy {
 	upstreamErrors := m.UpstreamErrors.WithLabelValues(rc.Name)
@@ -183,7 +196,8 @@ func newProxy(rc config.Route, target *url.URL, transport http.RoundTripper, m *
 			pr.SetURL(target) // scheme/host of upstream, path joined
 			pr.SetXForwarded()
 		},
-		Transport: transport,
+		Transport:  transport,
+		BufferPool: bufferPool,
 		ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
 			upstreamErrors.Inc()
 			writeJSONError(w, http.StatusBadGateway, "upstream unavailable")
