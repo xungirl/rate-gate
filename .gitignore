@@ -1,0 +1,5 @@
+/bin/
+*.out
+*.prof
+/results/raw/
+.DS_Store
