@@ -24,6 +24,14 @@ import (
 	"github.com/xungirl/rate-gate/internal/metrics"
 )
 
+// testClient keeps up to 100 idle connections per host. http.DefaultClient
+// keeps only 2, so concurrent tests would open (and leave in TIME_WAIT) a new
+// TCP connection per request and, over repeated runs, exhaust local ports.
+var testClient = &http.Client{
+	Transport: &http.Transport{MaxIdleConns: 200, MaxIdleConnsPerHost: 100},
+	Timeout:   10 * time.Second,
+}
+
 // upstream is a fake backend that counts hits and echoes the path it saw.
 type upstream struct {
 	*httptest.Server
@@ -89,7 +97,7 @@ func get(t *testing.T, url string, headers ...string) *http.Response {
 	for i := 0; i+1 < len(headers); i += 2 {
 		req.Header.Set(headers[i], headers[i+1])
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := testClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +137,7 @@ func TestRateLimitHeadersAnd429(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodGet, gw.URL+"/api/x", nil)
 	req.Header.Set("X-API-Key", "alice")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := testClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,7 +209,7 @@ routes:
       rate_limit: { key_by: ip, limit: 1, window: 1h } }
 `, up))
 
-	resp, err := http.Get(gw.URL + "/v1/users/7")
+	resp, err := testClient.Get(gw.URL + "/v1/users/7")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -253,7 +261,7 @@ func hammer(t *testing.T, instances []*instance, total int) int64 {
 				target := instances[i%len(instances)]
 				req, _ := http.NewRequest(http.MethodGet, target.URL+"/", nil)
 				req.Header.Set("X-API-Key", "shared-client")
-				resp, err := http.DefaultClient.Do(req)
+				resp, err := testClient.Do(req)
 				if err != nil {
 					t.Error(err)
 					continue
@@ -374,7 +382,7 @@ func TestRedisDownFailureModes(t *testing.T) {
 				t.Errorf("redis errors = %v, want 3 (breaker should stop further calls)", got)
 			}
 			var health map[string]string
-			resp, _ := http.Get(gw.URL + "/healthz")
+			resp, _ := testClient.Get(gw.URL + "/healthz")
 			_ = json.NewDecoder(resp.Body).Decode(&health)
 			resp.Body.Close()
 			if health["status"] != "degraded" || health["redis_breaker"] != "open" {
@@ -398,7 +406,7 @@ func counterValue(t *testing.T, gw *instance, name string) float64 {
 }
 
 func scrape(t *testing.T, gw *instance) string {
-	resp, err := http.Get(gw.URL + "/metrics")
+	resp, err := testClient.Get(gw.URL + "/metrics")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -99,7 +99,7 @@ func TestRecoversWhenRedisReturns(t *testing.T) {
 	m := miniredis.RunT(t)
 	c := redis.NewClient(&redis.Options{Addr: m.Addr(), MaxRetries: -1})
 	defer c.Close()
-	primary, _ := NewRedis(c, FixedWindow, Rule{Limit: 100, Window: time.Minute}, RedisOptions{Timeout: 100 * time.Millisecond})
+	primary, _ := NewRedis(c, FixedWindow, Rule{Limit: 100, Window: time.Minute}, RedisOptions{Timeout: time.Second})
 	fc := clock.NewFake(base)
 	br := breaker.New(1, time.Second, fc, nil)
 	r, _ := NewResilient(primary, nil, br, FailClosed, ResilientHooks{})

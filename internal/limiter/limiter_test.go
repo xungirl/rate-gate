@@ -405,7 +405,7 @@ func TestRealRedisBasics(t *testing.T) {
 	c := realRedisClient(t)
 	for _, alg := range Algorithms {
 		t.Run(string(alg), func(t *testing.T) {
-			l, err := NewRedis(c, alg, Rule{Limit: 5, Window: 10 * time.Second}, RedisOptions{Prefix: uniquePrefix(t)})
+			l, err := NewRedis(c, alg, Rule{Limit: 5, Window: 10 * time.Second}, RedisOptions{Prefix: uniquePrefix(t), Timeout: time.Second})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -413,7 +413,8 @@ func TestRealRedisBasics(t *testing.T) {
 				t.Fatalf("allowed %d want 5", got)
 			}
 			d := allow(t, l, "k")
-			if d.Allowed || d.RetryAfter <= 0 || d.RetryAfter > 10*time.Second {
+			// <= 2 windows: the sliding counter may wait for "prev" to decay.
+			if d.Allowed || d.RetryAfter <= 0 || d.RetryAfter > 20*time.Second {
 				t.Errorf("denied decision looks wrong: %+v", d)
 			}
 		})
@@ -426,7 +427,7 @@ func TestRedisKeysExpire(t *testing.T) {
 	c := redis.NewClient(&redis.Options{Addr: m.Addr()})
 	defer c.Close()
 	for _, alg := range Algorithms {
-		l, _ := NewRedis(c, alg, Rule{Limit: 5, Window: time.Second}, RedisOptions{Prefix: string(alg) + ":"})
+		l, _ := NewRedis(c, alg, Rule{Limit: 5, Window: time.Second}, RedisOptions{Prefix: string(alg) + ":", Timeout: time.Second})
 		if _, err := l.Allow(context.Background(), "k"); err != nil {
 			t.Fatal(err)
 		}
