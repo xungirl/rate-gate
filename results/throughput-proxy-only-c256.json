@@ -1,0 +1,18 @@
+{
+  "targets": [
+    "http://127.0.0.1:8080/plain/x"
+  ],
+  "concurrency": 256,
+  "duration_sec": 10.003289834,
+  "requests": 502331,
+  "errors": 0,
+  "status": {
+    "200": 502331
+  },
+  "throughput_rps": 50216.579578913756,
+  "allowed_rps": 50216.579578913756,
+  "p50_ms": 3.649,
+  "p90_ms": 9.653,
+  "p99_ms": 28.207,
+  "max_ms": 140.997
+}

@@ -1,0 +1,22 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/xungirl/rate-gate/internal/limiter
+cpu: Apple M2
+BenchmarkMemory/token_bucket/serial-one-key-8         	28473368	        81.15 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/token_bucket/parallel-10k-keys-8      	54253737	        43.01 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/token_bucket/parallel-one-key-8       	16419897	       148.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/fixed_window/serial-one-key-8         	43053477	        55.62 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/fixed_window/parallel-10k-keys-8      	62609239	        38.90 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/fixed_window/parallel-one-key-8       	18148642	       133.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/sliding_window_log/serial-one-key-8   	42423595	        56.53 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/sliding_window_log/parallel-10k-keys-8         	50643550	        40.69 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/sliding_window_log/parallel-one-key-8          	17738686	       132.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/sliding_window_counter/serial-one-key-8        	31383744	        76.19 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/sliding_window_counter/parallel-10k-keys-8     	55256833	        39.75 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMemory/sliding_window_counter/parallel-one-key-8      	16326697	       147.1 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRedis/token_bucket/parallel-10k-keys-8                	  133641	     17150 ns/op	    1000 B/op	      23 allocs/op
+BenchmarkRedis/fixed_window/parallel-10k-keys-8                	  140916	     15091 ns/op	     968 B/op	      23 allocs/op
+BenchmarkRedis/sliding_window_log/parallel-10k-keys-8          	  139413	     17783 ns/op	    1048 B/op	      26 allocs/op
+BenchmarkRedis/sliding_window_counter/parallel-10k-keys-8      	  150327	     15272 ns/op	     968 B/op	      23 allocs/op
+PASS
+ok  	github.com/xungirl/rate-gate/internal/limiter	43.050s

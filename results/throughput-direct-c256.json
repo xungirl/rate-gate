@@ -1,0 +1,18 @@
+{
+  "targets": [
+    "http://127.0.0.1:9001/api/x"
+  ],
+  "concurrency": 256,
+  "duration_sec": 10.00305725,
+  "requests": 1146850,
+  "errors": 0,
+  "status": {
+    "200": 1146850
+  },
+  "throughput_rps": 114649.94864445068,
+  "allowed_rps": 114649.94864445068,
+  "p50_ms": 1.552,
+  "p90_ms": 4.428,
+  "p99_ms": 12.32,
+  "max_ms": 69.167
+}

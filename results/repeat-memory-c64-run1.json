@@ -1,0 +1,18 @@
+{
+  "targets": [
+    "http://127.0.0.1:8080/api/x"
+  ],
+  "concurrency": 64,
+  "duration_sec": 10.000745833,
+  "requests": 535429,
+  "errors": 0,
+  "status": {
+    "200": 535429
+  },
+  "throughput_rps": 53538.90689164563,
+  "allowed_rps": 53538.90689164563,
+  "p50_ms": 0.837,
+  "p90_ms": 2.488,
+  "p99_ms": 5.663,
+  "max_ms": 15.532
+}
