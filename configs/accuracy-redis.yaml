@@ -1,0 +1,26 @@
+# Accuracy test: several gateway instances (started with -listen) share this
+# Redis. Each route uses a different algorithm with the same limit:
+# 1000 requests per second per API key.
+listen: ":8091"
+log: { level: warn }
+backend:
+  type: redis
+  redis: { addr: "127.0.0.1:6390", pool_size: 512, timeout: 200ms }
+  failure_mode: fail_closed
+routes:
+  - name: tb
+    path_prefix: /tb/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: token_bucket, key_by: api_key, limit: 1000, window: 1s }
+  - name: fw
+    path_prefix: /fw/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: fixed_window, key_by: api_key, limit: 1000, window: 1s }
+  - name: swl
+    path_prefix: /swl/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: sliding_window_log, key_by: api_key, limit: 1000, window: 1s }
+  - name: swc
+    path_prefix: /swc/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: sliding_window_counter, key_by: api_key, limit: 1000, window: 1s }

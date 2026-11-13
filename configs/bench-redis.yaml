@@ -1,0 +1,13 @@
+# Throughput benchmark, Redis backend (same never-rejecting limit; every
+# request runs the token-bucket Lua script on Redis).
+listen: ":8081"
+log: { level: warn }
+backend:
+  type: redis
+  redis: { addr: "127.0.0.1:6390", pool_size: 512, timeout: 200ms }
+  failure_mode: fail_closed   # so a Redis problem would show up as 503s, not hide
+routes:
+  - name: api
+    path_prefix: /api/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: token_bucket, key_by: api_key, limit: 1000000000, window: 1s }

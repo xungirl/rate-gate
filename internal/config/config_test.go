@@ -1,6 +1,7 @@
 package config
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -61,6 +62,20 @@ func TestParseRejectsBadConfig(t *testing.T) {
 	for name, raw := range cases {
 		if _, err := Parse([]byte(raw)); err == nil {
 			t.Errorf("%s: accepted, want error", name)
+		}
+	}
+}
+
+// TestShippedConfigsAreValid keeps the example/benchmark configs in sync
+// with the code.
+func TestShippedConfigsAreValid(t *testing.T) {
+	files, _ := filepath.Glob("../../configs/*.yaml")
+	if len(files) == 0 {
+		t.Fatal("no configs found")
+	}
+	for _, f := range files {
+		if _, err := Load(f); err != nil {
+			t.Errorf("%s: %v", f, err)
 		}
 	}
 }

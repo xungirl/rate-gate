@@ -1,0 +1,22 @@
+# Contrast for the accuracy test: same routes, in-memory backend. Each
+# instance enforces the limit on its own, so N instances allow ~N x the limit.
+listen: ":8091"
+log: { level: warn }
+backend: { type: memory }
+routes:
+  - name: tb
+    path_prefix: /tb/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: token_bucket, key_by: api_key, limit: 1000, window: 1s }
+  - name: fw
+    path_prefix: /fw/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: fixed_window, key_by: api_key, limit: 1000, window: 1s }
+  - name: swl
+    path_prefix: /swl/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: sliding_window_log, key_by: api_key, limit: 1000, window: 1s }
+  - name: swc
+    path_prefix: /swc/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: sliding_window_counter, key_by: api_key, limit: 1000, window: 1s }

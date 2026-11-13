@@ -1,0 +1,15 @@
+# Throughput benchmark, in-memory backend. The limit is set so high that no
+# request is ever rejected: every request pays the full limiter cost and is
+# then proxied, which is what we want to measure.
+listen: ":8080"
+log: { level: warn }
+backend: { type: memory }
+routes:
+  # Same proxy, no limiter: isolates the cost of the HTTP proxy hop itself.
+  - name: plain
+    path_prefix: /plain/
+    upstream: http://127.0.0.1:9001
+  - name: api
+    path_prefix: /api/
+    upstream: http://127.0.0.1:9001
+    rate_limit: { algorithm: token_bucket, key_by: api_key, limit: 1000000000, window: 1s }
