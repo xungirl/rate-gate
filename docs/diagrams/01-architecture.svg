@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#E8ECF2" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="vignette" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#F7F8FA" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#E3E8EF" stop-opacity="0.35"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0891B2"/>
+    </marker>
+    <marker id="av" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+    </marker>
+    <style>
+      .t  { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; fill: #111827; }
+      .m  { font-family: 'SF Mono', Menlo, Consolas, monospace; fill: #57606A; }
+      .h  { font-size: 21px; font-weight: 700; }
+      .s  { font-size: 14px; }
+      .xs { font-size: 12px; }
+      .panel { fill: #FFFFFF; stroke: #D0D7E2; stroke-width: 1.5; }
+      .chip  { fill: #F3F5F9; stroke: #C9D2DE; stroke-width: 1; }
+      .wire  { stroke: #0891B2; stroke-width: 2; fill: none; }
+      .wirev { stroke: #7C3AED; stroke-width: 2; fill: none; }
+      .wireg { stroke: #059669; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#DC2626"/>
+    </marker>
+    <marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#57606A"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#F7F8FA"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+  <rect width="1600" height="1000" fill="url(#vignette)"/>
+
+  <!-- header -->
+  <text x="60" y="52" class="m xs" style="fill:#0891B2;letter-spacing:3px">RATE-GATE · 01 / ARCHITECTURE</text>
+  <text x="60" y="94" class="t" font-size="36" font-weight="800">One shared rate limit across many gateway instances</text>
+  <text x="60" y="126" class="m s">Go reverse proxy · 4 algorithms · atomic Redis Lua · circuit breaker · Prometheus · hot reload</text>
+  <text x="1540" y="52" class="m xs" text-anchor="end">github.com/xungirl/rate-gate</text>
+
+  <!-- clients -->
+  <text x="60" y="172" class="m xs" style="letter-spacing:2px">CLIENTS</text>
+  <rect x="60" y="190" width="200" height="150" rx="12" class="panel" style="stroke:#7C3AED"/>
+  <text x="80" y="226" class="t h">Clients</text>
+  <text x="80" y="256" class="m s">identified by</text>
+  <text x="80" y="280" class="m s" style="fill:#7C3AED">api_key · user_id</text>
+  <text x="80" y="304" class="m s" style="fill:#7C3AED">header · client IP</text>
+
+  <!-- KPIs -->
+  <text x="60" y="400" class="m xs" style="letter-spacing:2px">MEASURED</text>
+  <text x="60" y="444" class="t" font-size="30" font-weight="800" style="fill:#059669">10,000</text>
+  <text x="60" y="466" class="m xs">allowed of 10,000 expected</text>
+  <text x="60" y="484" class="m xs">3 gateways, one Redis</text>
+  <text x="60" y="534" class="t" font-size="30" font-weight="800" style="fill:#0891B2">100 / 100</text>
+  <text x="60" y="556" class="m xs">100 goroutines × 20 calls,</text>
+  <text x="60" y="574" class="m xs">limit 100: exactly 100</text>
+  <text x="60" y="624" class="t" font-size="30" font-weight="800" style="fill:#B45309">0 allocs</text>
+  <text x="60" y="646" class="m xs">38.9–148.3 ns per</text>
+  <text x="60" y="664" class="m xs">in-memory decision</text>
+
+  <path d="M260 265 H316" class="wirev" marker-end="url(#av)"/>
+
+  <!-- gateway stack -->
+  <text x="320" y="172" class="m xs" style="letter-spacing:2px">GATEWAY · ANY NUMBER OF IDENTICAL PROCESSES</text>
+  <rect x="336" y="206" width="760" height="520" rx="14" fill="#FFFFFF" stroke="#D0D7E2" stroke-width="1.2"/>
+  <rect x="328" y="198" width="760" height="520" rx="14" fill="#FFFFFF" stroke="#D0D7E2" stroke-width="1.2"/>
+  <rect x="320" y="190" width="760" height="520" rx="14" class="panel" style="stroke:#0891B2"/>
+  <text x="340" y="222" class="t h">gateway ×3</text>
+  <text x="472" y="222" class="m xs">per request, per route</text>
+
+  <!-- pipeline -->
+  <g>
+    <rect x="340" y="240" width="170" height="64" rx="10" class="chip" style="stroke:#0891B2"/>
+    <text x="356" y="266" class="t" font-size="16" font-weight="700">① match route</text>
+    <text x="356" y="290" class="m xs">longest path prefix</text>
+    <rect x="530" y="240" width="170" height="64" rx="10" class="chip" style="stroke:#0891B2"/>
+    <text x="546" y="266" class="t" font-size="16" font-weight="700">② extract key</text>
+    <text x="546" y="290" class="m xs">api_key | user | IP</text>
+    <rect x="720" y="240" width="170" height="64" rx="10" class="chip" style="stroke:#0891B2"/>
+    <text x="736" y="266" class="t" font-size="16" font-weight="700">③ Allow(ctx, key)</text>
+    <text x="736" y="290" class="m xs">Limiter interface</text>
+    <rect x="910" y="240" width="150" height="64" rx="10" class="chip" style="stroke:#0891B2"/>
+    <text x="926" y="266" class="t" font-size="16" font-weight="700">④ decide</text>
+    <text x="926" y="290" class="m xs">deny or forward</text>
+    <path d="M510 272 H528" class="wire" marker-end="url(#a)"/>
+    <path d="M700 272 H718" class="wire" marker-end="url(#a)"/>
+    <path d="M890 272 H908" class="wire" marker-end="url(#a)"/>
+  </g>
+
+  <!-- limiter internals -->
+  <path d="M805 304 V330" class="wire" marker-end="url(#a)"/>
+  <text x="340" y="352" class="m xs" style="letter-spacing:2px">LIMITER BACKENDS</text>
+  <rect x="340" y="364" width="240" height="190" rx="12" class="panel" style="stroke:#B45309"/>
+  <text x="358" y="394" class="t" font-size="18" font-weight="700">memory</text>
+  <g class="m s">
+    <text x="358" y="422">▸ 64-shard map</text>
+    <text x="358" y="446">▸ mutex per shard</text>
+    <text x="358" y="470">▸ TTL sweep goroutine</text>
+    <text x="358" y="494">▸ injected Clock</text>
+  </g>
+  <text x="358" y="530" class="m xs" style="fill:#B45309">10k keys 38.9–43.0 ns</text>
+  <text x="358" y="546" class="m xs" style="fill:#B45309">hot key 132.5–148.3 ns</text>
+
+  <rect x="600" y="364" width="240" height="190" rx="12" class="panel" style="stroke:#2563EB"/>
+  <text x="618" y="394" class="t" font-size="18" font-weight="700">Resilient (redis)</text>
+  <g class="m s">
+    <text x="618" y="422">▸ breaker: 5 errors</text>
+    <text x="618" y="444">  → open 2 s → probe</text>
+    <text x="618" y="470">▸ fail_open</text>
+    <text x="618" y="494">▸ fail_closed (503)</text>
+    <text x="618" y="518">▸ local_fallback</text>
+  </g>
+  <text x="618" y="542" class="m xs" style="fill:#2563EB">50 ms budget per Redis call</text>
+
+  <!-- outcomes -->
+  <path d="M985 304 V330" class="wire" marker-end="url(#a)"/>
+  <rect x="860" y="334" width="200" height="104" rx="12" fill="#FDECEC" stroke="#DC2626" stroke-width="1.5"/>
+  <text x="878" y="364" class="t" font-size="17" font-weight="700" style="fill:#DC2626">denied → 429</text>
+  <text x="878" y="388" class="m xs">Retry-After (rounded up)</text>
+  <text x="878" y="406" class="m xs">X-RateLimit-Limit/</text>
+  <text x="878" y="424" class="m xs">Remaining/Reset</text>
+  <rect x="860" y="450" width="200" height="104" rx="12" fill="#E7F7EF" stroke="#059669" stroke-width="1.5"/>
+  <text x="878" y="480" class="t" font-size="17" font-weight="700" style="fill:#059669">allowed → proxy</text>
+  <text x="878" y="504" class="m xs">httputil.ReverseProxy</text>
+  <text x="878" y="522" class="m xs">1024 idle conns/host</text>
+  <text x="878" y="540" class="m xs">(Go default: 2)</text>
+
+  <!-- ops strip -->
+  <text x="340" y="590" class="m xs" style="letter-spacing:2px">OPERATIONS</text>
+  <g class="m xs">
+    <rect x="340" y="604" width="170" height="80" rx="10" class="chip"/>
+    <text x="356" y="632" style="fill:#DB2777;font-weight:700">/metrics</text>
+    <text x="356" y="652">Prometheus counters</text>
+    <text x="356" y="668">incl. degraded</text>
+    <rect x="525" y="604" width="170" height="80" rx="10" class="chip"/>
+    <text x="541" y="632" style="fill:#DB2777;font-weight:700">/healthz</text>
+    <text x="541" y="652">JSON status with</text>
+    <text x="541" y="668">breaker state</text>
+    <rect x="710" y="604" width="170" height="80" rx="10" class="chip"/>
+    <text x="726" y="632" style="fill:#DB2777;font-weight:700">SIGHUP reload</text>
+    <text x="726" y="652">new route table via</text>
+    <text x="726" y="668">atomic.Pointer swap</text>
+    <rect x="895" y="604" width="165" height="80" rx="10" class="chip"/>
+    <text x="911" y="632" style="fill:#DB2777;font-weight:700">SIGINT / TERM</text>
+    <text x="911" y="652">graceful</text>
+    <text x="911" y="668">shutdown</text>
+  </g>
+
+  <!-- redis -->
+  <text x="1140" y="172" class="m xs" style="letter-spacing:2px">SHARED STATE</text>
+  <rect x="1140" y="190" width="400" height="310" rx="14" class="panel" style="stroke:#DC2626"/>
+  <text x="1160" y="226" class="t h">Redis</text>
+  <text x="1236" y="226" class="m xs">one Lua script per decision</text>
+  <g class="m s">
+    <text x="1160" y="262">▸ EVALSHA (falls back to EVAL)</text>
+    <text x="1160" y="290">▸ redis.call('TIME'): one clock</text>
+    <text x="1160" y="310" class="xs">  no clock skew between gateways</text>
+    <text x="1160" y="338">▸ read · decide · write · PEXPIRE</text>
+    <text x="1160" y="366">▸ key rg:&lt;route&gt;:&lt;alg&gt;:{client}</text>
+    <text x="1160" y="386" class="xs">  hash tag: Cluster-safe (untested)</text>
+  </g>
+  <rect x="1160" y="410" width="360" height="70" rx="10" fill="#E7F7EF" stroke="#059669"/>
+  <text x="1180" y="438" class="m s" style="fill:#059669;font-weight:700">why not GET-then-SET?</text>
+  <text x="1180" y="462" class="m xs" style="fill:#111827">two gateways read "99 of 100" and both allow</text>
+
+  <!-- upstream -->
+  <rect x="1140" y="530" width="400" height="180" rx="14" class="panel" style="stroke:#059669"/>
+  <text x="1160" y="566" class="t h">Upstream services</text>
+  <g class="m s">
+    <text x="1160" y="600">▸ only allowed requests arrive</text>
+    <text x="1160" y="628">▸ rejected ones are never forwarded</text>
+    <text x="1160" y="656">▸ degraded decisions carry</text>
+    <text x="1160" y="678" class="xs">  X-RateLimit-Degraded: true</text>
+  </g>
+
+  <!-- wires to right -->
+  <path d="M1096 300 H1138" stroke="#DC2626" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+  <text x="1102" y="290" class="m xs" style="fill:#DC2626">Lua</text>
+  <path d="M1060 502 C1100 502 1100 610 1138 610" class="wireg" marker-end="url(#ag)"/>
+
+  <!-- algorithms table -->
+  <rect x="60" y="745" width="1480" height="220" rx="14" class="panel"/>
+  <text x="80" y="778" class="t h">4 algorithms · one interface · both backends</text>
+  <text x="560" y="778" class="m xs">boundary test: 10 + 10 requests around a window edge, limit 10/s (TestBoundaryBurst)</text>
+  <g class="m xs" style="letter-spacing:1px">
+    <text x="80" y="812">ALGORITHM</text><text x="330" y="812">STATE PER KEY</text><text x="620" y="812">ACCURACY</text><text x="1000" y="812">BOUNDARY TEST</text><text x="1300" y="812">REDIS TYPE</text>
+  </g>
+  <line x1="80" y1="822" x2="1520" y2="822" stroke="#D0D7E2"/>
+  <g class="m s">
+    <text x="80" y="850" style="fill:#111827;font-weight:700">Token bucket</text><text x="330" y="850">2 numbers</text><text x="620" y="850">exact for its model (rate + burst)</text><text x="1000" y="850" style="fill:#B45309">11 allowed</text><text x="1300" y="850">HASH</text>
+    <text x="80" y="880" style="fill:#111827;font-weight:700">Fixed window</text><text x="330" y="880">counter + window id</text><text x="620" y="880">up to 2x the limit at a boundary</text><text x="1000" y="880" style="fill:#DC2626">20 allowed ✗</text><text x="1300" y="880">HASH</text>
+    <text x="80" y="910" style="fill:#111827;font-weight:700">Sliding log</text><text x="330" y="910">1 timestamp per request</text><text x="620" y="910">exact in any window</text><text x="1000" y="910" style="fill:#059669">10 allowed ✓</text><text x="1300" y="910">ZSET</text>
+    <text x="80" y="940" style="fill:#111827;font-weight:700">Sliding counter</text><text x="330" y="940">2 counters + window id</text><text x="620" y="940">approximate, O(1) memory</text><text x="1000" y="940" style="fill:#059669">10 allowed ✓</text><text x="1300" y="940">HASH</text>
+  </g>
+</svg>

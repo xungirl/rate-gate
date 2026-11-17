@@ -27,6 +27,15 @@ commands and caveats in [BENCHMARK.md](BENCHMARK.md)):
   118,978 req/s.
 - One in-memory decision takes ~40-150 ns with 0 allocations (`go test -bench`).
 
+## Diagrams
+
+| | |
+|---|---|
+| ![Architecture](docs/diagrams/01-architecture.png) | ![Results](docs/diagrams/02-results.png) |
+| **01 · Architecture**: request pipeline, limiter backends, failure policy, shared Redis, the 4 algorithms | **02 · Results**: shared-limit accuracy to scale, concurrency tests, cost per decision, bugs fixed |
+
+Hand-written SVG sources sit next to the PNGs; `docs/diagrams/render.sh` re-renders them with headless Chrome. Every number comes from `results/` or `go test`; throughput is left out on purpose (±20% run-to-run variance).
+
 ## Project Journey
 
 How the project was built, in commit order, including what broke. All of it

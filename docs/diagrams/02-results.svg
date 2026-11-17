@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#E8ECF2" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="vignette" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#F7F8FA" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#E3E8EF" stop-opacity="0.35"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0891B2"/>
+    </marker>
+    <marker id="av" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7C3AED"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+    </marker>
+    <style>
+      .t  { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; fill: #111827; }
+      .m  { font-family: 'SF Mono', Menlo, Consolas, monospace; fill: #57606A; }
+      .h  { font-size: 21px; font-weight: 700; }
+      .s  { font-size: 14px; }
+      .xs { font-size: 12px; }
+      .panel { fill: #FFFFFF; stroke: #D0D7E2; stroke-width: 1.5; }
+      .chip  { fill: #F3F5F9; stroke: #C9D2DE; stroke-width: 1; }
+      .wire  { stroke: #0891B2; stroke-width: 2; fill: none; }
+      .wirev { stroke: #7C3AED; stroke-width: 2; fill: none; }
+      .wireg { stroke: #059669; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#F7F8FA"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+  <rect width="1600" height="1000" fill="url(#vignette)"/>
+
+  <!-- header -->
+  <text x="60" y="52" class="m xs" style="fill:#0891B2;letter-spacing:3px">RATE-GATE · 02 / RESULTS</text>
+  <text x="60" y="94" class="t" font-size="36" font-weight="800">Exactly the limit, not ~3x: shared Redis vs per-instance memory</text>
+  <text x="60" y="126" class="m s">every number from results/ and go test · one Apple M2 laptop, localhost</text>
+  <text x="1540" y="52" class="m xs" text-anchor="end">github.com/xungirl/rate-gate</text>
+
+  <!-- A: accuracy -->
+  <rect x="60" y="160" width="950" height="420" rx="14" class="panel"/>
+  <text x="84" y="196" class="t h">Shared-limit accuracy, 3 gateway instances</text>
+  <text x="84" y="220" class="m xs">open loop · 6,000 req/s offered (59,994 requests) vs a 1,000 req/s limit · 10 s · allowed req/s, to scale</text>
+
+  <!-- scale: x0=330, 6000 -> 640px  (0.10667 px per req/s) -->
+  <line x1="330" y1="244" x2="330" y2="546" stroke="#C9D2DE"/>
+  <line x1="436.7" y1="244" x2="436.7" y2="546" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="436.7" y="566" class="m xs" text-anchor="middle" style="fill:#059669;font-weight:700">limit 1,000</text>
+  <line x1="650" y1="244" x2="650" y2="546" stroke="#E3E8EF"/>
+  <text x="650" y="566" class="m xs" text-anchor="middle">3,000</text>
+  <line x1="970" y1="244" x2="970" y2="546" stroke="#DC2626" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <text x="966" y="566" class="m xs" text-anchor="end" style="fill:#DC2626">offered 6,000</text>
+  <text x="330" y="566" class="m xs" text-anchor="middle">0</text>
+
+  <text x="84" y="252" class="m xs" style="fill:#059669;letter-spacing:2px">REDIS · SHARED</text>
+  <g class="m s">
+    <text x="84" y="280">token bucket</text>
+    <rect x="330" y="266" width="106.7" height="20" rx="4" fill="#059669"/>
+    <text x="448" y="282" style="fill:#059669;font-weight:700">1,000/s · 10,000 total</text>
+    <text x="84" y="310">fixed window</text>
+    <rect x="330" y="296" width="106.7" height="20" rx="4" fill="#059669"/>
+    <text x="448" y="312" style="fill:#059669;font-weight:700">1,000/s · 10,000 total</text>
+    <text x="84" y="340">sliding log</text>
+    <rect x="330" y="326" width="106.7" height="20" rx="4" fill="#059669"/>
+    <text x="448" y="342" style="fill:#059669;font-weight:700">1,000/s · 10,000 total</text>
+    <text x="84" y="370">sliding counter</text>
+    <rect x="330" y="356" width="106.6" height="20" rx="4" fill="#0891B2"/>
+    <text x="448" y="372" style="fill:#0891B2;font-weight:700">999/s · 9,990 total (approximate by design)</text>
+  </g>
+
+  <text x="84" y="408" class="m xs" style="fill:#DC2626;letter-spacing:2px">MEMORY · PER INSTANCE</text>
+  <g class="m s">
+    <text x="84" y="436">token bucket</text>
+    <rect x="330" y="422" width="319.7" height="20" rx="4" fill="#F4A7A7"/>
+    <text x="662" y="438" style="fill:#DC2626">2,998/s</text>
+    <text x="84" y="466">fixed window</text>
+    <rect x="330" y="452" width="320" height="20" rx="4" fill="#F4A7A7"/>
+    <text x="662" y="468" style="fill:#DC2626">3,000/s</text>
+    <text x="84" y="496">sliding log</text>
+    <rect x="330" y="482" width="320" height="20" rx="4" fill="#F4A7A7"/>
+    <text x="662" y="498" style="fill:#DC2626">3,000/s</text>
+    <text x="84" y="526">sliding counter</text>
+    <rect x="330" y="512" width="318.2" height="20" rx="4" fill="#F4A7A7"/>
+    <text x="662" y="528" style="fill:#DC2626">2,983/s</text>
+  </g>
+  <text x="740" y="468" class="t" font-size="26" font-weight="800" style="fill:#DC2626">~3x</text>
+  <text x="740" y="492" class="m xs" style="fill:#DC2626">3 instances × the limit</text>
+
+  <!-- B: correctness tests -->
+  <text x="1040" y="178" class="m xs" style="letter-spacing:2px">CONCURRENCY CORRECTNESS · go test -race</text>
+  <rect x="1040" y="190" width="500" height="118" rx="12" class="panel" style="stroke:#059669"/>
+  <text x="1062" y="222" class="t" font-size="17" font-weight="700">100 goroutines × 20 requests, one key</text>
+  <text x="1062" y="246" class="m xs">TestConcurrentNeverExceedsLimit · miniredis + real Redis</text>
+  <text x="1062" y="286" class="t" font-size="30" font-weight="800" style="fill:#059669">100</text>
+  <text x="1124" y="286" class="m s">allowed for a limit of 100</text>
+
+  <rect x="1040" y="320" width="500" height="118" rx="12" class="panel" style="stroke:#059669"/>
+  <text x="1062" y="352" class="t" font-size="17" font-weight="700">3 gateway instances, 300 concurrent requests</text>
+  <text x="1062" y="376" class="m xs">TestMultiInstanceSharedRedis · limit 50</text>
+  <text x="1062" y="416" class="t" font-size="30" font-weight="800" style="fill:#059669">50</text>
+  <text x="1110" y="416" class="m s">allowed · memory contrast: 150</text>
+
+  <rect x="1040" y="450" width="500" height="120" rx="12" class="panel" style="stroke:#B45309"/>
+  <text x="1062" y="482" class="t" font-size="17" font-weight="700">The fixed-window flaw, proven by a test</text>
+  <text x="1062" y="506" class="m xs">10 requests at t=0.9 s + 10 at t=1.0 s, limit 10/s</text>
+  <g class="m s">
+    <text x="1062" y="540" style="fill:#DC2626;font-weight:700">fixed 20</text>
+    <text x="1162" y="540" style="fill:#B45309;font-weight:700">token bucket 11</text>
+    <text x="1322" y="540" style="fill:#059669;font-weight:700">sliding 10 / 10</text>
+  </g>
+  <text x="1062" y="560" class="m xs">TestBoundaryBurst</text>
+
+  <!-- C: cost per decision, log scale: x = 300 + 115*(log10(ns)-1) -->
+  <rect x="60" y="600" width="950" height="230" rx="14" class="panel"/>
+  <text x="84" y="634" class="t h">Cost per decision</text>
+  <text x="270" y="634" class="m xs">go test -bench · log scale · ranges across the 4 algorithms</text>
+  <line x1="300" y1="780" x2="990" y2="780" stroke="#C9D2DE"/>
+  <g class="m xs" text-anchor="middle">
+    <line x1="300" y1="776" x2="300" y2="784" stroke="#8A94A3"/><text x="300" y="802">10 ns</text>
+    <line x1="415" y1="776" x2="415" y2="784" stroke="#8A94A3"/><text x="415" y="802">100 ns</text>
+    <line x1="530" y1="776" x2="530" y2="784" stroke="#8A94A3"/><text x="530" y="802">1 µs</text>
+    <line x1="645" y1="776" x2="645" y2="784" stroke="#8A94A3"/><text x="645" y="802">10 µs</text>
+    <line x1="760" y1="776" x2="760" y2="784" stroke="#8A94A3"/><text x="760" y="802">100 µs</text>
+  </g>
+  <g class="m s">
+    <text x="84" y="670">memory · 10k keys</text>
+    <rect x="368" y="658" width="7" height="16" rx="3" fill="#059669"/>
+    <text x="388" y="671" style="fill:#059669;font-weight:700">38.9–43.0 ns · 0 allocs</text>
+    <text x="84" y="702">memory · serial</text>
+    <rect x="386" y="690" width="19" height="16" rx="3" fill="#0891B2"/>
+    <text x="418" y="703" style="fill:#0891B2">55.6–81.2 ns</text>
+    <text x="84" y="734">memory · one hot key</text>
+    <rect x="429" y="722" width="7" height="16" rx="3" fill="#B45309"/>
+    <text x="448" y="735" style="fill:#B45309">132.5–148.3 ns (~3–4x: one shard's mutex)</text>
+    <text x="84" y="766">Redis · parallel</text>
+    <rect x="666" y="754" width="9" height="16" rx="3" fill="#DC2626"/>
+    <text x="688" y="767" style="fill:#DC2626">15.1–17.8 µs · network round trip</text>
+  </g>
+
+  <!-- D: failure policy -->
+  <rect x="1040" y="600" width="500" height="230" rx="14" class="panel" style="stroke:#2563EB"/>
+  <text x="1062" y="634" class="t h">When Redis fails</text>
+  <text x="1062" y="658" class="m xs">breaker: 5 consecutive errors → open 2 s → one probe</text>
+  <g class="m s">
+    <text x="1062" y="694" style="fill:#2563EB;font-weight:700">fail_open</text><text x="1222" y="694">allow · availability first</text>
+    <text x="1062" y="724" style="fill:#2563EB;font-weight:700">fail_closed</text><text x="1222" y="724">503 + Retry-After</text>
+    <text x="1062" y="754" style="fill:#2563EB;font-weight:700">local_fallback</text><text x="1222" y="754">per-instance limit,</text>
+    <text x="1222" y="774">≤ N × limit, bounded</text>
+  </g>
+  <text x="1062" y="810" class="m xs">tested: open breaker skips Redis; cancels ≠ errors</text>
+
+  <!-- E: debugged strip -->
+  <text x="60" y="852" class="m xs" style="letter-spacing:2px">DEBUGGED ALONG THE WAY</text>
+  <g>
+    <rect x="60" y="864" width="355" height="100" rx="12" class="panel"/>
+    <text x="80" y="892" class="m s" style="fill:#DC2626;font-weight:700">Lua lost timestamp digits</text>
+    <text x="80" y="916" class="m xs">%.14g formatting truncated a</text>
+    <text x="80" y="934" class="m xs">16-digit µs timestamp</text>
+    <text x="80" y="954" class="m xs" style="fill:#059669">✓ string.format('%d', ts)</text>
+
+    <rect x="435" y="864" width="355" height="100" rx="12" class="panel"/>
+    <text x="455" y="892" class="m s" style="fill:#DC2626;font-weight:700">Flaky under -race -count=10</text>
+    <text x="455" y="916" class="m xs">DefaultClient keeps 2 idle conns:</text>
+    <text x="455" y="934" class="m xs">ephemeral ports ran out</text>
+    <text x="455" y="954" class="m xs" style="fill:#059669">✓ shared client, 100 idle/host</text>
+
+    <rect x="810" y="864" width="355" height="100" rx="12" class="panel"/>
+    <text x="830" y="892" class="m s" style="fill:#DC2626;font-weight:700">Retry-After assertion failed</text>
+    <text x="830" y="916" class="m xs">sliding counter can legitimately</text>
+    <text x="830" y="934" class="m xs">ask for up to 2 windows</text>
+    <text x="830" y="954" class="m xs" style="fill:#059669">✓ assertion widened, documented</text>
+
+    <rect x="1185" y="864" width="355" height="100" rx="12" class="panel"/>
+    <text x="1205" y="892" class="m s" style="fill:#DC2626;font-weight:700">Re-runs differed by 15–26%</text>
+    <text x="1205" y="916" class="m xs">re-runs showed ±20% variance</text>
+    <text x="1205" y="934" class="m xs">on a shared laptop</text>
+    <text x="1205" y="954" class="m xs" style="fill:#059669">✓ throughput kept out of claims</text>
+  </g>
+</svg>
